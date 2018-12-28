@@ -1,0 +1,20 @@
+/* 
+  Localization.strings
+  GLKLineKit
+
+  Created by walker on 2018/10/24.
+  Copyright © 2018 walker. All rights reserved.
+*/
+
+"kline_demo_portrait" = "PorTrait";
+"kline_demo_landscape" = "Landscape";
+"kline_demo_24change" = "24hChange   ";
+"kline_demo_timeLine" = "Time line";
+"kline_demo_Kline" = "K lines";
+
+"trade_commission_date" = "Date";
+"trade_open" = "O";
+"trade_high" = "H";
+"trade_low" = "L";
+"trade_closed" = "C";
+"trade_amount_short" = "V";

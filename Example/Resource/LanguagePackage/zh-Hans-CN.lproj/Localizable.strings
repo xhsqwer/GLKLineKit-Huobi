@@ -1,0 +1,21 @@
+/* 
+  Localization.strings
+  GLKLineKit
+
+  Created by walker on 2018/10/24.
+  Copyright © 2018 walker. All rights reserved.
+*/
+
+"kline_demo_portrait" = "竖屏";
+"kline_demo_landscape" = "横屏";
+"kline_demo_24change" = "24h涨跌  ";
+"kline_demo_timeLine" = "分时";
+"kline_demo_Kline" = "K线";
+
+"trade_commission_date" = "日期";
+"trade_open" = "开";
+"trade_high" = "高";
+"trade_low" = "低";
+"trade_closed" = "收";
+"trade_amount_short" = "量";
+
