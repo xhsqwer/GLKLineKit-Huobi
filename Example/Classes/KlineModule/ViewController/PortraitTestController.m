@@ -25,6 +25,8 @@
 @interface PortraitTestController ()
 {
     SocketManager *_socketData;
+    BOOL _sendStatus;
+    BOOL _openStatus;
 }
 /**
  简单行情视图
@@ -113,7 +115,9 @@
                                                    // 如果返回YES表示需要合并，当前合并条件是两个元素的时间戳一致
                                                    return [KLineDataProcess checkoutIsInSameTimeSectionWithFirstTime:[firstModel.id integerValue] secondTime:[secondModel.id integerValue]];
                                                }];
-                                               [self sendMessage];
+                                               if (self->_openStatus == 1) {
+                                                   [self sendMessage];
+                                               }
                                                [self.simpleKLineView gl_stopAnimating];
                                            } failed:^(id error) {
                                                NSLog(@"-----%@",error);
@@ -160,7 +164,10 @@
     
     [_socketData webSocketOpen:@"wss://api.huobi.pro/ws" connect:^{
         NSLog(@"成功连接");
-
+        self->_openStatus=YES;
+        if (self->_sendStatus == 0) {
+            [self sendMessage];
+        }
     } receive:^(id message, SocketReceiveType type) {
         if (type == SocketReceiveTypeForMessage) {
             NSLog(@"接收 类型1--%@",message);
@@ -185,7 +192,7 @@
 }
 
 -(void)sendMessage{
-
+    _sendStatus=YES;
     NSDictionary * dataDic = [NSDictionary dictionaryWithObjectsAndKeys:@"market.btcusdt.kline.1min",@"sub",@"id1",@"id", nil];
     NSData *data = [NSJSONSerialization dataWithJSONObject:dataDic options:NSJSONWritingPrettyPrinted error:nil];
 
