@@ -11,8 +11,6 @@
 #import <SDWebImage/UIImageView+WebCache.h>
 #import "KLineDataProcess.h"
 
-#import "SocketRocket.h"
-
 #import <CommonCrypto/CommonDigest.h>
 #import <CommonCrypto/CommonHMAC.h>
 
@@ -20,14 +18,13 @@
 
 #import "WebSocketModel.h"
 
+#import "SocketManager.h"
+
 #import "zlib.h"
 
-@interface PortraitTestController ()<SRWebSocketDelegate>
+@interface PortraitTestController ()
 {
-    NSTimer * heartBeat;//心跳
-    NSTimeInterval reConnecTime;
-    
-    NSString * strHear;
+    SocketManager *_socketData;
 }
 /**
  简单行情视图
@@ -43,8 +40,6 @@
  K线切换按钮
  */
 @property (strong, nonatomic) UIButton *klineBtn;
-
-@property(nonatomic,strong)SRWebSocket * webSocket;
 
 @end
 
@@ -107,8 +102,6 @@
     
     [self.simpleKLineView gl_startAnimating];
     
-//    __weak typeof(self)weakSelf = self;
-    
     [SYYHuobiNetHandler requestHistoryKlineWithTag:self
                                             symbol:@"btcusdt"
                                             period:@"1min"
@@ -163,147 +156,40 @@
 }
 
 -(void)initSocket{
-    //Url
-    NSURL *url = [NSURL URLWithString:@"wss://api.huobi.pro/ws"];
-    //    //请求
-    NSMutableURLRequest *request = [[NSMutableURLRequest alloc]initWithURL:url cachePolicy:NSURLRequestUseProtocolCachePolicy timeoutInterval:20];
-    //初始化请求`
-    if (self.webSocket) {
-        return;
-    }
-    _webSocket = [[SRWebSocket alloc] initWithURLRequest:request];
-    //代理协议
-    _webSocket.delegate = self;
-    // 实现这个 SRWebSocketDelegate 协议啊
-    //直接连接`
-    [_webSocket open];    // open 就是直接连接了
+    _socketData= [SocketManager sharedInsatance];
+    
+    [_socketData webSocketOpen:@"wss://api.huobi.pro/ws" connect:^{
+        NSLog(@"成功连接");
+
+    } receive:^(id message, SocketReceiveType type) {
+        if (type == SocketReceiveTypeForMessage) {
+            NSLog(@"接收 类型1--%@",message);
+            NSError *err;
+            NSDictionary *dic = [NSJSONSerialization JSONObjectWithData:[self uncompressZippedData:message]
+                                                                options:NSJSONReadingMutableContainers
+                                                                  error:&err];
+            //
+            NSLog(@"服务信息------:%@",[NSJSONSerialization JSONObjectWithData:[self uncompressZippedData:message]
+                                                                   options:NSJSONReadingMutableContainers
+                                                                     error:&err]);
+            WebSocketModel *item = [WebSocketModel objectFromDictionary:dic];
+            
+            [self dataWith:item];
+        }
+        else if (type == SocketReceiveTypeForPong){
+            NSLog(@"接收 类型2--%@",message);
+        }
+    } failure:^(NSError *error) {
+        NSLog(@"连接失败");
+    }];
 }
 
 -(void)sendMessage{
 
     NSDictionary * dataDic = [NSDictionary dictionaryWithObjectsAndKeys:@"market.btcusdt.kline.1min",@"sub",@"id1",@"id", nil];
     NSData *data = [NSJSONSerialization dataWithJSONObject:dataDic options:NSJSONWritingPrettyPrinted error:nil];
-    [_webSocket send: [[NSString alloc] initWithData:data
-                                            encoding:NSUTF8StringEncoding]];
 
-}
-
-- (void)webSocketDidOpen:(SRWebSocket *)webSocket {
-    NSLog(@"连接成功，可以立刻登录你公司后台的服务器了，还有开启心跳");
-}
-
--(void)initHearBeat
-{
-    if (@available(iOS 10.0, *)) {
-        dispatch_main_async_safe((^{
-            [self destoryHeartBeat];
-            
-            __weak typeof (self) weakSelf=self;
-            //心跳设置为3分钟，NAT超时一般为5分钟
-            self->heartBeat=[NSTimer scheduledTimerWithTimeInterval:60*3 repeats:YES block:^(NSTimer * _Nonnull timer) {
-                
-                NSNumber *kk= [NSNumber numberWithLong:[self->strHear longLongValue]];
-//                self->strHear;
-                
-                NSDictionary * dataDic = [NSDictionary dictionaryWithObjectsAndKeys:kk,@"pong", nil];
-                NSData *data = [NSJSONSerialization dataWithJSONObject:dataDic options:NSJSONWritingPrettyPrinted error:nil];
-                //和服务端约定好发送什么作为心跳标识，尽可能的减小心跳包大小
-                [self sendMsg:data];
-            }];
-            [[NSRunLoop currentRunLoop] addTimer:self->heartBeat forMode:NSRunLoopCommonModes];
-        }))
-    } else {
-        // Fallback on earlier versions
-    }
-}
-
--(void)sendMsg:(id)msg
-{
-    [self.webSocket send:msg];
-}
-
-//   取消心跳
--(void)destoryHeartBeat
-{
-    dispatch_main_async_safe(^{
-        if (self->heartBeat) {
-            [self->heartBeat invalidate];
-            self->heartBeat=nil;
-        }
-    })
-}
-
-
--(void)webSocket:(SRWebSocket *)webSocket didFailWithError:(NSError *)error {
-    NSLog(@"连接失败，这里可以实现掉线自动重连，要注意以下几点");
-    NSLog(@"1.判断当前网络环境，如果断网了就不要连了，等待网络到来，在发起重连");
-    NSLog(@"2.判断调用层是否需要连接，例如用户都没在聊天界面，连接上去浪费流量");
-    //关闭心跳包
-    [self reConnect];
-}
-- (void)webSocket:(SRWebSocket *)webSocket didCloseWithCode:(NSInteger)code reason:(NSString *)reason wasClean:(BOOL)wasClean {
-    //关闭心跳包
-    //    [webSocket close];
-    NSLog(@"连接断开，清空socket对象，清空该清空的东西，还有关闭心跳!");
-    NSLog(@"%@",reason);
-    //如果是被用户自己中断的那么直接断开连接，否则开始重连
-    //    if (code == disConnectByUser) {
-    //        [self disConnect];
-    //    }else{
-    
-    [self reConnect];
-    //    }
-    //断开连接时销毁心跳
-    [self destoryHeartBeat];
-}
-
-//  重连机制
--(void)reConnect
-{
-    [self disConnect];
-    
-    //  超过一分钟就不再重连   之后重连5次  2^5=64
-    if (reConnecTime>64) {
-        return;
-    }
-    
-    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(reConnecTime * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-        self.webSocket = nil;
-        [self initSocket];
-    });
-    
-    //   重连时间2的指数级增长
-    if (reConnecTime == 0) {
-        reConnecTime =2;
-    }else{
-        reConnecTime *=2;
-    }
-}
-
-//   断开连接
--(void)disConnect
-{
-    if (self.webSocket) {
-        [self.webSocket close];
-        self.webSocket = nil;
-    }
-}
-
-- (void)webSocket:(SRWebSocket *)webSocket didReceiveMessage:(id)message  {
-    //收到数据代理方法
-    // 收到数据后,你要给后台发送的数据.
-    
-    NSError *err;
-    NSDictionary *dic = [NSJSONSerialization JSONObjectWithData:[self uncompressZippedData:message]
-                                                        options:NSJSONReadingMutableContainers
-                                                          error:&err];
-//
-    NSLog(@"服务信息------:%@",[NSJSONSerialization JSONObjectWithData:[self uncompressZippedData:message]
-                                                           options:NSJSONReadingMutableContainers
-                                                             error:&err]);
-    WebSocketModel *item = [WebSocketModel objectFromDictionary:dic];
-    
-    [self dataWith:item];
+    [_socketData webSocketSend:[[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding]];
 }
 
 -(void)dataWith:(WebSocketModel *)dicModel
@@ -314,9 +200,8 @@
         
         NSData *data = [NSJSONSerialization dataWithJSONObject:dataDic options:NSJSONWritingPrettyPrinted error:nil];
         
+        [_socketData webSocketSend:[[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding]];
 
-        [self.webSocket send:[[NSString alloc] initWithData:data
-                                              encoding:NSUTF8StringEncoding]];
     }else if (dicModel.tick != nil){
         NSArray *dataArray = [NSArray arrayWithObject:dicModel.tick];
         

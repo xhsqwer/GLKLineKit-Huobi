@@ -23,6 +23,7 @@
 		17E8EABE21D4C5B600436E19 /* libbz2.1.0.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 17E8EABD21D4C5B600436E19 /* libbz2.1.0.tbd */; };
 		17E8EAC121D5C99600436E19 /* WebSocketModel.m in Sources */ = {isa = PBXBuildFile; fileRef = 17E8EAC021D5C99600436E19 /* WebSocketModel.m */; };
 		17E8EAC421D5D1E400436E19 /* WebSocketModel1.m in Sources */ = {isa = PBXBuildFile; fileRef = 17E8EAC321D5D1E400436E19 /* WebSocketModel1.m */; };
+		17E8EAD221D6157000436E19 /* SocketManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 17E8EAD021D6156F00436E19 /* SocketManager.m */; };
 		346882504493AAA9D9D798F3 /* libPods-GLKLineKit.a in Frameworks */ = {isa = PBXBuildFile; fileRef = F7E39A72D4B565348CAE9B28 /* libPods-GLKLineKit.a */; };
 		5D1638772170996F007C81CB /* LanguageTool.m in Sources */ = {isa = PBXBuildFile; fileRef = 5D1638752170996E007C81CB /* LanguageTool.m */; };
 		5D16387B21709E56007C81CB /* UIFont+ScaleSize.m in Sources */ = {isa = PBXBuildFile; fileRef = 5D16387A21709E56007C81CB /* UIFont+ScaleSize.m */; };
@@ -132,6 +133,8 @@
 		17E8EAC021D5C99600436E19 /* WebSocketModel.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = WebSocketModel.m; sourceTree = "<group>"; };
 		17E8EAC221D5D1E400436E19 /* WebSocketModel1.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = WebSocketModel1.h; sourceTree = "<group>"; };
 		17E8EAC321D5D1E400436E19 /* WebSocketModel1.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = WebSocketModel1.m; sourceTree = "<group>"; };
+		17E8EAD021D6156F00436E19 /* SocketManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SocketManager.m; sourceTree = "<group>"; };
+		17E8EAD121D6157000436E19 /* SocketManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SocketManager.h; sourceTree = "<group>"; };
 		5D1638752170996E007C81CB /* LanguageTool.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LanguageTool.m; sourceTree = "<group>"; };
 		5D1638762170996E007C81CB /* LanguageTool.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LanguageTool.h; sourceTree = "<group>"; };
 		5D16387921709E56007C81CB /* UIFont+ScaleSize.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIFont+ScaleSize.h"; sourceTree = "<group>"; };
@@ -534,6 +537,8 @@
 		5D4CEFC1216DD738009D5602 /* CustomClass */ = {
 			isa = PBXGroup;
 			children = (
+				17E8EAD121D6157000436E19 /* SocketManager.h */,
+				17E8EAD021D6156F00436E19 /* SocketManager.m */,
 				5D1638742170996E007C81CB /* LanguageTool */,
 				5D4CEFC2216DD738009D5602 /* DetailView */,
 				5D4CEFC5216DD738009D5602 /* ReticleLine */,
@@ -1002,6 +1007,7 @@
 				5D4CF02C216DD738009D5602 /* NSNumber+StringFormatter.m in Sources */,
 				5D4CF02A216DD738009D5602 /* KLineVolViewConfig.m in Sources */,
 				17E8EAB721D4758600436E19 /* NetWorkManager.m in Sources */,
+				17E8EAD221D6157000436E19 /* SocketManager.m in Sources */,
 				5D4CF016216DD738009D5602 /* NSLayoutConstraint+MASDebugAdditions.m in Sources */,
 				5D4CF05A216DDDE0009D5602 /* UIColor+Hex.m in Sources */,
 				5D4CF021216DD738009D5602 /* DetailDataView.m in Sources */,
@@ -1231,7 +1237,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.NewTestDemo.gl;
+				PRODUCT_BUNDLE_IDENTIFIER = com.HuobiDemo.glkline;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -1251,7 +1257,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.NewTestDemo.gl;
+				PRODUCT_BUNDLE_IDENTIFIER = com.HuobiDemo.glkline;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
