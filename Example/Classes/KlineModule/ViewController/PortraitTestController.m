@@ -27,6 +27,7 @@
     SocketManager *_socketData;
     BOOL _sendStatus;
     BOOL _openStatus;
+    BOOL _getStatus;
 }
 /**
  简单行情视图
@@ -118,6 +119,7 @@
                                                if (self->_openStatus == 1) {
                                                    [self sendMessage];
                                                }
+                                               self->_getStatus=YES;
                                                [self.simpleKLineView gl_stopAnimating];
                                            } failed:^(id error) {
                                                NSLog(@"-----%@",error);
@@ -165,18 +167,17 @@
     [_socketData webSocketOpen:@"wss://api.huobi.pro/ws" connect:^{
         NSLog(@"成功连接");
         self->_openStatus=YES;
-        if (self->_sendStatus == 0) {
+        if (self->_sendStatus == 0 && self->_getStatus == 1) {
             [self sendMessage];
         }
     } receive:^(id message, SocketReceiveType type) {
         if (type == SocketReceiveTypeForMessage) {
-            NSLog(@"接收 类型1--%@",message);
             NSError *err;
             NSDictionary *dic = [NSJSONSerialization JSONObjectWithData:[self uncompressZippedData:message]
                                                                 options:NSJSONReadingMutableContainers
                                                                   error:&err];
             //
-            NSLog(@"服务信息------:%@",[NSJSONSerialization JSONObjectWithData:[self uncompressZippedData:message]
+            NSLog(@"接收 类型1-----:%@",[NSJSONSerialization JSONObjectWithData:[self uncompressZippedData:message]
                                                                    options:NSJSONReadingMutableContainers
                                                                      error:&err]);
             WebSocketModel *item = [WebSocketModel objectFromDictionary:dic];
